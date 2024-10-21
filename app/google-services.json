@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "896568933516",
+    "project_id": "umnstoryuts",
+    "storage_bucket": "umnstoryuts.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896568933516:android:2714f787f132a10a1d0fa9",
+        "android_client_info": {
+          "package_name": "com.example.umnstoryuts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA13uinQ6wpfTa2EWffe5KNpkttoeLU0Po"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
