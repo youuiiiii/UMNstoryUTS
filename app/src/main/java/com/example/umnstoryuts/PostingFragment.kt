@@ -12,6 +12,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.util.*
@@ -29,9 +30,7 @@ class PostingFragment : Fragment() {
     private val storage = FirebaseStorage.getInstance()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_posting, container, false)
 
         // Initialize views
@@ -48,7 +47,7 @@ class PostingFragment : Fragment() {
         postButton.setOnClickListener {
             val content = postContentEditText.text.toString().trim()
             if (content.isNotEmpty() && selectedImageUri != null) {
-                uploadImage(content) // Start image upload
+                uploadImage(content)
             } else {
                 Toast.makeText(requireContext(), "Please add content and select an image!", Toast.LENGTH_SHORT).show()
             }
@@ -57,25 +56,26 @@ class PostingFragment : Fragment() {
         return view
     }
 
-    // Open the image chooser
     private fun openImageChooser() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         imagePickerLauncher.launch(intent)
     }
 
-    // Handle image selection result
-    private val imagePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                selectedImageUri = result.data?.data
-                selectedImageView.setImageURI(selectedImageUri)
-            }
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            selectedImageUri = result.data?.data
+            selectedImageView.setImageURI(selectedImageUri)
+        }
+    }
+
+    private fun uploadImage(content: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
+            return
         }
 
-    // Upload the image to Firebase Storage
-    private fun uploadImage(content: String) {
-        // Disable interactions and show loading
         setLoading(true)
 
         val postId = UUID.randomUUID().toString()
@@ -85,66 +85,53 @@ class PostingFragment : Fragment() {
             storageRef.putFile(uri)
                 .addOnSuccessListener {
                     storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                        savePost(content, downloadUrl.toString(), postId)
+                        val newPost = Post(
+                            id = postId,
+                            uid = user.uid,
+                            content = content,
+                            imageUrl = downloadUrl.toString(),
+                            timestamp = System.currentTimeMillis()
+                        )
+                        addPost(newPost)
                     }
                 }
                 .addOnFailureListener { exception ->
                     Log.e("Firebase", "Failed to upload image", exception)
-                    setLoading(false) // Stop loading on failure
+                    setLoading(false)
                     Toast.makeText(requireContext(), "Image upload failed!", Toast.LENGTH_SHORT).show()
                 }
+        } ?: run {
+            setLoading(false)
+            Toast.makeText(requireContext(), "Please select an image first.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Save the post to Firestore
-    private fun savePost(content: String, imageUrl: String, postId: String) {
-        val post = mapOf(
-            "id" to postId,
-            "content" to content,
-            "imageUrl" to imageUrl,
-            "timestamp" to System.currentTimeMillis()
-        )
-
-        firestore.collection("posts").document(postId)
+    private fun addPost(post: Post) {
+        firestore.collection("posts").document(post.id)
             .set(post)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Post submitted!", Toast.LENGTH_SHORT).show()
                 setLoading(false)
-
-                // Update BottomNavigationView to highlight Home tab
-                val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
-                bottomNav.selectedItemId = R.id.nav_home
-
-                // Navigate back to HomeFragment
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, HomeFragment())
-                    .commit()
+                navigateToHome()
             }
             .addOnFailureListener { exception ->
+                Log.e("Firebase", "Failed to submit post", exception)
                 setLoading(false)
                 Toast.makeText(requireContext(), "Failed to submit post!", Toast.LENGTH_SHORT).show()
             }
     }
 
-
-    // Method to navigate back to HomeFragment
     private fun navigateToHome() {
+        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNav.selectedItemId = R.id.nav_home
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, HomeFragment())
             .commit()
     }
 
-
-    // Show or hide the loading indicator
     private fun setLoading(isLoading: Boolean) {
-        if (isLoading) {
-            progressBar.visibility = View.VISIBLE
-            postButton.isEnabled = false
-            selectImageButton.isEnabled = false
-        } else {
-            progressBar.visibility = View.GONE
-            postButton.isEnabled = true
-            selectImageButton.isEnabled = true
-        }
+        progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        postButton.isEnabled = !isLoading
+        selectImageButton.isEnabled = !isLoading
     }
 }

@@ -23,13 +23,29 @@
         android:gravity="start">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/baseline_thumb_up_24"
-            android:contentDescription="Like Icon" />
+            android:id="@+id/likeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_thumb_up_off_alt_24"
+            android:layout_marginEnd="4dp"/>
+
+        <TextView
+            android:id="@+id/likesTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 Likes"
+            android:textSize="14sp"
+            android:layout_gravity="center_vertical"/>
+
+        <ImageView
+            android:id="@+id/pinButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_star_border_24"
+            android:layout_marginStart="16dp"/>
 
     </LinearLayout>
+
 
     <!-- Post Title -->
     <TextView
