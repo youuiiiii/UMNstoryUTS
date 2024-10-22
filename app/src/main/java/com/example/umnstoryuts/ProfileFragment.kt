@@ -1,16 +1,72 @@
 package com.example.umnstoryuts
 
+import android.content.Intent
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileFragment : Fragment() {
+
+    private lateinit var profileImageView: ImageView
+    private lateinit var nameTextView: TextView
+    private lateinit var studentNumberTextView: TextView
+    private lateinit var emailTextView: TextView
+    private lateinit var editProfileButton: Button
+    private lateinit var logoutButton: Button
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_profile, container, false)
+
+        profileImageView = view.findViewById(R.id.profileImageView)
+        nameTextView = view.findViewById(R.id.nameTextView)
+        studentNumberTextView = view.findViewById(R.id.studentNumberTextView)
+        emailTextView = view.findViewById(R.id.emailTextView)
+        editProfileButton = view.findViewById(R.id.editProfileButton)
+        logoutButton = view.findViewById(R.id.logoutButton)
+
+        logoutButton.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(activity, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+
+        editProfileButton.setOnClickListener {
+            val intent = Intent(activity, EditProfileActivity::class.java)
+            startActivity(intent)
+        }
+
+        return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadProfileData()
+    }
+
+    private fun loadProfileData() {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let {
+            emailTextView.text = it.email  // Email from FirebaseAuth
+            FirebaseFirestore.getInstance().collection("users").document(it.uid)
+                .get().addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        nameTextView.text = document.getString("name") ?: "No Name"
+                        studentNumberTextView.text = document.getString("studentNumber") ?: "No Student Number"
+                    }
+                }.addOnFailureListener {
+                    nameTextView.text = "Failed to load name"
+                    studentNumberTextView.text = "Failed to load student number"
+                }
+        }
     }
 }
