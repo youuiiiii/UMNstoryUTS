@@ -2,13 +2,14 @@ package com.example.umnstoryuts
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -35,14 +36,11 @@ class ProfileFragment : Fragment() {
 
         logoutButton.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
-            val intent = Intent(activity, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+            startActivity(Intent(activity, LoginActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
         }
 
         editProfileButton.setOnClickListener {
-            val intent = Intent(activity, EditProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(activity, EditProfileActivity::class.java))
         }
 
         return view
@@ -56,16 +54,17 @@ class ProfileFragment : Fragment() {
     private fun loadProfileData() {
         val user = FirebaseAuth.getInstance().currentUser
         user?.let {
-            emailTextView.text = it.email  // Email from FirebaseAuth
             FirebaseFirestore.getInstance().collection("users").document(it.uid)
                 .get().addOnSuccessListener { document ->
                     if (document.exists()) {
                         nameTextView.text = document.getString("name") ?: "No Name"
                         studentNumberTextView.text = document.getString("studentNumber") ?: "No Student Number"
+                        emailTextView.text = it.email
+                        Glide.with(this).load(it.photoUrl ?: R.drawable.baseline_person_24).into(profileImageView)
                     }
                 }.addOnFailureListener {
-                    nameTextView.text = "Failed to load name"
-                    studentNumberTextView.text = "Failed to load student number"
+                    nameTextView.text = "Failed to load"
+                    studentNumberTextView.text = "Failed to load"
                 }
         }
     }
