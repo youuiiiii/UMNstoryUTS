@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:padding="16dp">
 
     <LinearLayout
@@ -16,7 +17,10 @@
             android:layout_height="wrap_content"
             android:hint="Name"
             android:inputType="textPersonName"
-            android:padding="12dp"/>
+            android:padding="12dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#888888"/>
 
         <EditText
             android:id="@+id/editStudentNumber"
@@ -24,13 +28,18 @@
             android:layout_height="wrap_content"
             android:hint="Student Number"
             android:inputType="number"
-            android:padding="12dp"/>
+            android:padding="12dp"
+            android:background="@drawable/edit_text_background"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#888888"/>
 
         <Button
             android:id="@+id/saveProfileButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Save Changes"
+            android:background="@drawable/button_background"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="20dp"/>
     </LinearLayout>
 </ScrollView>

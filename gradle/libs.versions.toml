@@ -1,5 +1,6 @@
 [versions]
 agp = "8.6.0"
+cardview = "1.0.0"
 compiler = "4.15.1"
 firebaseAuth = "latest_version"
 firebaseAuthVersion = "21.0.1"
@@ -21,9 +22,11 @@ firebaseCommonKtx = "21.0.0"
 firebaseFirestoreKtx = "25.1.0"
 firebaseStorageKtx = "21.0.1"
 databindingRuntime = "8.7.1"
+materialVersion = "1.4.0"
 picasso = "2.71828"
 
 [libraries]
+androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycleExtensions" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
@@ -48,6 +51,7 @@ firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-k
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 androidx-databinding-runtime = { group = "androidx.databinding", name = "databinding-runtime", version.ref = "databindingRuntime" }
+material-v140 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 
 [plugins]

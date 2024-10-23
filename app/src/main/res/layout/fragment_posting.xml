@@ -1,45 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:padding="16dp">
+
+    <!-- User Avatar -->
+    <ImageView
+        android:id="@+id/userAvatar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="User avatar"
+        android:src="@drawable/baseline_person_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Selected Image View -->
+    <ImageView
+        android:id="@+id/selectedImageView"
+        android:layout_width="0dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="8dp"
+        android:adjustViewBounds="true"
+        android:background="#000000"
+        android:contentDescription="Post Image"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userAvatar" />
 
     <!-- Text input for the post content -->
     <EditText
         android:id="@+id/inputPostContent"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:hint="What's on your mind?"
-        android:gravity="start|top"
-        android:inputType="textMultiLine" />
-
-    <!-- ImageView to display the selected image -->
-    <ImageView
-        android:id="@+id/selectedImageView"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_below="@id/inputPostContent"
-        android:layout_marginTop="16dp"
-        android:scaleType="centerCrop" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#333333"
+        android:hint="Write your thoughts?!"
+        android:inputType="textMultiLine"
+        android:minHeight="200dp"
+        android:padding="8dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#888888"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selectedImageView" />
 
     <!-- Button to select an image -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/selectImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#1DA1F2"
         android:text="Select Image"
-        android:layout_below="@id/selectedImageView"
-        android:layout_marginTop="16dp" />
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        app:cornerRadius="4dp"
+        app:elevation="2dp"
+        app:icon="@drawable/baseline_add_photo_alternate_24"
+        app:iconPadding="8dp"
+        app:iconTint="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputPostContent"
+        app:rippleColor="#80FFFFFF" />
+
 
     <!-- Button to submit the post -->
     <Button
         android:id="@+id/submitPostBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@android:color/transparent"
         android:text="Post"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@id/selectImageButton"
-        android:layout_marginTop="16dp" />
+        android:textColor="#1DA1F2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/selectImageButton"
+        app:layout_constraintTop_toTopOf="@+id/selectImageButton" />
 
     <!-- ProgressBar for loading indicator -->
     <ProgressBar
@@ -47,5 +87,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:visibility="gone" /> <!-- Initially hidden -->
-</RelativeLayout>
+        android:visibility="gone" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
