@@ -46,10 +46,14 @@ class PostingFragment : Fragment() {
         // Handle post submission
         postButton.setOnClickListener {
             val content = postContentEditText.text.toString().trim()
-            if (content.isNotEmpty() && selectedImageUri != null) {
-                uploadImage(content)
+            if (content.isNotEmpty() || selectedImageUri != null) {
+                if (selectedImageUri != null) {
+                    uploadImage(content)
+                } else {
+                    postTextOnly(content)  // Post only text
+                }
             } else {
-                Toast.makeText(requireContext(), "Please add content and select an image!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Please add some content or select an image!", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -70,12 +74,7 @@ class PostingFragment : Fragment() {
     }
 
     private fun uploadImage(content: String) {
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user == null) {
-            Toast.makeText(requireContext(), "Not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
-
+        val user = FirebaseAuth.getInstance().currentUser ?: return
         setLoading(true)
 
         val postId = UUID.randomUUID().toString()
@@ -104,6 +103,33 @@ class PostingFragment : Fragment() {
             setLoading(false)
             Toast.makeText(requireContext(), "Please select an image first.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun postTextOnly(content: String) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        setLoading(true)
+
+        val postId = UUID.randomUUID().toString()
+        val newPost = Post(
+            id = postId,
+            uid = user.uid,
+            content = content,
+            imageUrl = null.toString(),
+            timestamp = System.currentTimeMillis()
+        )
+
+        firestore.collection("posts").document(postId)
+            .set(newPost)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Post submitted!", Toast.LENGTH_SHORT).show()
+                setLoading(false)
+                navigateToHome()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Failed to submit post", e)
+                setLoading(false)
+                Toast.makeText(requireContext(), "Failed to submit post!", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun addPost(post: Post) {
