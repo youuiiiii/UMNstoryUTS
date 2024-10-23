@@ -19,7 +19,7 @@
         android:background="#000000"
         app:itemIconTint="@color/bottom_nav_item_color"
         app:itemTextColor="@color/bottom_nav_item_color"
-        app:menu="@menu/bottom_nav_menu"
-        app:labelVisibilityMode="labeled" />
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav_menu" />
 
 </RelativeLayout>

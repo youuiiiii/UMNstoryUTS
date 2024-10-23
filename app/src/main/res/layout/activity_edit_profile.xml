@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#000000"
     android:padding="16dp">
 
@@ -39,6 +40,7 @@
             android:layout_height="wrap_content"
             android:text="Save Changes"
             android:background="@drawable/button_background"
+            app:backgroundTint="@null"
             android:textColor="#FFFFFF"
             android:layout_marginTop="20dp"/>
     </LinearLayout>
