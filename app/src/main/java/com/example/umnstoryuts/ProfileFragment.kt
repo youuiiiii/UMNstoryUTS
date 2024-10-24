@@ -10,11 +10,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileFragment : Fragment() {
-
     private lateinit var profileImageView: ImageView
     private lateinit var nameTextView: TextView
     private lateinit var studentNumberTextView: TextView
@@ -43,6 +43,8 @@ class ProfileFragment : Fragment() {
             startActivity(Intent(activity, EditProfileActivity::class.java))
         }
 
+        loadProfileData()
+
         return view
     }
 
@@ -50,6 +52,7 @@ class ProfileFragment : Fragment() {
         super.onResume()
         loadProfileData()
     }
+
 
     private fun loadProfileData() {
         val user = FirebaseAuth.getInstance().currentUser
@@ -60,7 +63,11 @@ class ProfileFragment : Fragment() {
                         nameTextView.text = document.getString("name") ?: "No Name"
                         studentNumberTextView.text = document.getString("studentNumber") ?: "No Student Number"
                         emailTextView.text = it.email
-                        Glide.with(this).load(it.photoUrl ?: R.drawable.baseline_person_24).into(profileImageView)
+                        Glide.with(this)
+                            .load(it.photoUrl ?: R.drawable.baseline_person_24)
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .into(profileImageView)
                     }
                 }.addOnFailureListener {
                     nameTextView.text = "Failed to load"

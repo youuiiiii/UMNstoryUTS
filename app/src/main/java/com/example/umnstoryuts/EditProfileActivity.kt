@@ -15,7 +15,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class EditProfileActivity : AppCompatActivity() {
-
     private lateinit var editName: EditText
     private lateinit var editStudentNumber: EditText
     private lateinit var profileImageView: ImageView
@@ -44,37 +43,47 @@ class EditProfileActivity : AppCompatActivity() {
     private fun openImageSelector() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
-        startActivityForResult(intent, 1001) // Arbitrary request code
+        startActivityForResult(intent, 1001)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1001 && resultCode == RESULT_OK && data != null && data.data != null) {
-            val imageUri = data.data as Uri
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
+            val imageUri = data.data
             profileImageView.setImageURI(imageUri)
             uploadImageToFirebase(imageUri)
         }
     }
 
-    private fun uploadImageToFirebase(imageUri: Uri) {
+    private fun uploadImageToFirebase(imageUri: Uri?) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
         val storageRef = FirebaseStorage.getInstance().reference.child("profileImages/${user.uid}.jpg")
-        storageRef.putFile(imageUri).addOnSuccessListener {
+        storageRef.putFile(imageUri!!).addOnSuccessListener {
             storageRef.downloadUrl.addOnSuccessListener { uri ->
-                val photoUrl = uri.toString()
-                user.updateProfile(UserProfileChangeRequest.Builder().setPhotoUri(uri).build())
-                FirebaseFirestore.getInstance().collection("users").document(user.uid)
-                    .update("profilePictureUrl", photoUrl)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Profile image updated.", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Failed to update profile in Firestore.", Toast.LENGTH_SHORT).show()
-                    }
+                updateProfileWithImage(user.uid, uri.toString())
             }
         }.addOnFailureListener {
             Toast.makeText(this, "Failed to upload image.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun updateProfileWithImage(userId: String, imageUrl: String) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        FirebaseFirestore.getInstance().collection("users").document(userId)
+            .update("profilePictureUrl", imageUrl)
+            .addOnSuccessListener {
+                val profileUpdates = UserProfileChangeRequest.Builder().setPhotoUri(Uri.parse(imageUrl)).build()
+                user.updateProfile(profileUpdates).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Profile image updated.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Failed to update profile image.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Failed to update profile in Firestore.", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun loadUserData() {
@@ -84,8 +93,8 @@ class EditProfileActivity : AppCompatActivity() {
                 if (document.exists()) {
                     editName.setText(document.getString("name"))
                     editStudentNumber.setText(document.getString("studentNumber"))
-                    document.getString("profilePictureUrl")?.let { imageUrl ->
-                        Glide.with(this).load(imageUrl).into(profileImageView)
+                    document.getString("profilePictureUrl")?.let {
+                        Glide.with(this).load(it).into(profileImageView)
                     }
                 }
             }.addOnFailureListener {
@@ -109,9 +118,14 @@ class EditProfileActivity : AppCompatActivity() {
         )
         FirebaseFirestore.getInstance().collection("users").document(user.uid).update(updates)
             .addOnSuccessListener {
-                user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(newName).build())
-                Toast.makeText(this, "Profile updated successfully.", Toast.LENGTH_SHORT).show()
-                finish()
+                user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(newName).build()).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Profile updated successfully.", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Failed to update Firebase user profile.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Failed to update profile.", Toast.LENGTH_SHORT).show()
